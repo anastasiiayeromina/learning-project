@@ -1,8 +1,9 @@
-import fs from 'fs-js'
+import fs from 'fs'
 import nookies from 'nookies'
 import { getUniqueId } from '../helpers/getUniqueId'
 import { getCookieIndex } from '../helpers/getCookieIndex'
 import { getParsedFile } from '../helpers/getParsedFile'
+import { getUserStatus } from '../helpers/getUserStatus'
 import { addUser, updateUser } from '../helpers/user'
 
 export const getServerSideProps = async (context) => {
@@ -33,12 +34,11 @@ export const getServerSideProps = async (context) => {
   }
 
   const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
-  const userCookieIndex = getCookieIndex(userData, userId);
-  const userVisitsCount = userData[userCookieIndex].visitCounts;
-
-  const isGuest = userVisitsCount < 3;
-  const isFriend = userVisitsCount >= 3 && userVisitsCount < 5;
-  const isFamilyMember = userVisitsCount >= 5;
+  const {
+    isGuest,
+    isFriend,
+    isFamilyMember,
+  } = getUserStatus(userData, userId);
 
   return {
     props: {

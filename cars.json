@@ -1,0 +1,17 @@
+[
+    {
+        "id": "C-1",
+        "content": "Доступна Tesla Model S",
+        "dateOfReceiving": "Sat Jan 30 2021 23:46:30 GMT+0200 (Eastern European Standard Time)"
+    },
+    {
+        "id": "C-2",
+        "content": "Доступна лошадь класса Мустанг",
+        "dateOfReceiving": "Sat Jan 30 2021 23:46:30 GMT+0200 (Eastern European Standard Time)"
+    },
+    {
+        "id": "C-3",
+        "content": "Доступен ковер Алладина. В качестве топлива использует человеческую кровь.",
+        "dateOfReceiving": "Sat Jan 30 2021 23:46:30 GMT+0200 (Eastern European Standard Time)"
+    }
+]
