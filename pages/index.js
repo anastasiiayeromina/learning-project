@@ -1,65 +1,75 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import fs from 'fs-js'
+import nookies from 'nookies'
+import { getUniqueId } from '../helpers/getUniqueId'
+import { getCookieIndex } from '../helpers/getCookieIndex'
+import { getParsedFile } from '../helpers/getParsedFile'
+import { addUser, updateUser } from '../helpers/user'
 
-export default function Home() {
+export const getServerSideProps = async (context) => {
+  const promises = fs.promises;
+  const cookies = nookies.get(context);
+  const userId = cookies.userId || getUniqueId();
+  
+  if (!cookies.userId) {
+    nookies.set(context, 'userId', userId);
+  }
+
+  try {
+    const data = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+    const cookieIndex = getCookieIndex(data, userId);
+    
+    if (cookieIndex < 0) {
+      addUser(data, userId);
+  
+      await promises.writeFile('./users.json', JSON.stringify(data, null, 4));
+    } else if (data[cookieIndex].userId === cookies.userId) {
+      updateUser(data, cookieIndex);
+
+      await promises.writeFile('./users.json', JSON.stringify(data, null, 4));
+    }
+    
+  } catch (error) {
+      console.error(error);
+  }
+
+  const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+  const userCookieIndex = getCookieIndex(userData, userId);
+  const userVisitsCount = userData[userCookieIndex].visitCounts;
+
+  const isGuest = userVisitsCount < 3;
+  const isFriend = userVisitsCount >= 3 && userVisitsCount < 5;
+  const isFamilyMember = userVisitsCount >= 5;
+
+  return {
+    props: {
+      isGuest,
+      isFriend,
+      isFamilyMember,
+    }
+  }
+}
+
+const Home = (props) => {
+  const {isGuest, isFriend, isFamilyMember} = props;
+
+  const guestJSX = isGuest && (
+    <h1>Приветствуем тебя, странник!</h1>
+  );
+
+  const friendJSX = isFriend && (
+    <h1>Приветствуем тебя, друг!</h1>
+  );
+
+  const familyMemberJSX = isFamilyMember && (
+    <h1>Добро пожаловать в семье!</h1>
+  );
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    <>
+      {guestJSX}
+      {friendJSX}
+      {familyMemberJSX}
+    </>
   )
 }
+
+export default Home;
