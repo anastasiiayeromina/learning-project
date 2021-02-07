@@ -56,13 +56,13 @@ export const getServerSideProps = async (context) => {
 
   store.dispatch(userActions.fillUser({userId}));
   store.dispatch(userActions.setVisitCounts({visitCounts}));
-  // store.dispatch(userActions.setUserType({userType}));
+  store.dispatch(userActions.setUserType({userType}));
 
   const initialReduxState = {
     user: {
       userId: selectUserId(store.getState()),
       visitCounts: selectVisitCounts(store.getState()),
-      // userType: selectUserType(store.getState()),
+      userType: selectUserType(store.getState()),
     }
   };
 

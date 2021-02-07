@@ -2,16 +2,16 @@
     {
         "id": "D-1",
         "content": "На шоссе 666 в магазинах скидка 30%",
-        "dateOfReceiving": "Sun Feb 07 2021 01:00:27 GMT+0200 (Eastern European Standard Time)"
+        "dateOfReceiving": "Sun Feb 07 2021 12:36:10 GMT+0200 (Eastern European Standard Time)"
     },
     {
         "id": "D-2",
         "content": "На шоссе 123 в магазине Начинающий Бетономешает 50% скидка по промокоду СТАРТАП",
-        "dateOfReceiving": "Sun Feb 07 2021 01:00:27 GMT+0200 (Eastern European Standard Time)"
+        "dateOfReceiving": "Sun Feb 07 2021 12:36:10 GMT+0200 (Eastern European Standard Time)"
     },
     {
         "id": "D-3",
         "content": "На рынке, который на шоссе 777, со вторника большие скидки на кожанные изделия",
-        "dateOfReceiving": "Sun Feb 07 2021 01:00:27 GMT+0200 (Eastern European Standard Time)"
+        "dateOfReceiving": "Sun Feb 07 2021 12:36:10 GMT+0200 (Eastern European Standard Time)"
     }
 ]
