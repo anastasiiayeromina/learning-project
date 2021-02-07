@@ -18,6 +18,7 @@ import { getUniqueId } from '../helpers/getUniqueId';
 import UserInfo from '../components/user-info';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser, updateUser } from '../helpers/user';
+import { selectUserId, selectUserType, selectVisitCounts } from '../bus/user/selectors';
 
 export const getServerSideProps = async (context) => {
   console.log('getServerSideProps: Dashboard');
@@ -74,9 +75,15 @@ export const getServerSideProps = async (context) => {
 
   store.dispatch(userActions.fillUser({userId}));
   store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
+  // store.dispatch(userActions.setUserType({userType}));
 
-  const initialReduxState = store.getState();
+  const initialReduxState = {
+    user: {
+      userId: selectUserId(store.getState()),
+      visitCounts: selectVisitCounts(store.getState()),
+      // userType: selectUserType(store.getState()),
+    }
+  };
   console.log('initialReduxState will be sent to App Dashboard', initialReduxState);
 
   return {
@@ -92,12 +99,22 @@ export const getServerSideProps = async (context) => {
 const Dashboard = (props) => {
   console.log('Dashboard');
   const {newsData, discountsData, carsData, initialReduxState} = props;
-  const initialUser = initialReduxState.user;
-  const dispatch = useDispatch();
-  dispatch(userActions.setVisitCounts({ visitCounts: initialUser.visitCounts }));
+  // const initialUserVisitCounts = initialReduxState.visitCounts;
+
+  // let userType = '';
+  // if (initialUserVisitCounts < 3) {
+  //   userType = 'guest';
+  // }
+  // else if (initialUserVisitCounts >= 3 && initialUserVisitCounts < 5) {
+  //   userType = 'friend';
+  // } else if (initialUserVisitCounts >= 5) {
+  //   userType = 'familyMember';
+  // }
+
+  // const dispatch = useDispatch();
+  // dispatch(userActions.setUserType({ userType: userType }));
   
   const {user} = useSelector((state) => state);
-
 
   const hasCars = user.userType === 'familyMember';
   const hasDiscounts = user.userType === 'friend' || hasCars;

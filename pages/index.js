@@ -5,6 +5,7 @@ import nookies from 'nookies';
 import { initialDispatcher } from "../init/initialDispatcher";
 import { initializeStore } from "../init/store";
 import { userActions } from "../bus/user/actions";
+import { selectVisitCounts, selectUserId, selectUserType } from '../bus/user/selectors';
 // Helpers
 import { getUniqueId } from '../helpers/getUniqueId';
 import { getCookieIndex } from '../helpers/getCookieIndex';
@@ -15,7 +16,7 @@ import { addUser, updateUser } from '../helpers/user';
 import Message from '../components/message';
 import Menu from '../components/menu';
 import UserInfo from '../components/user-info';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const getServerSideProps = async (context) => {
   console.log('getServerSideProps: Home');
@@ -55,9 +56,16 @@ export const getServerSideProps = async (context) => {
 
   store.dispatch(userActions.fillUser({userId}));
   store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
+  // store.dispatch(userActions.setUserType({userType}));
 
-  const initialReduxState = store.getState();
+  const initialReduxState = {
+    user: {
+      userId: selectUserId(store.getState()),
+      visitCounts: selectVisitCounts(store.getState()),
+      // userType: selectUserType(store.getState()),
+    }
+  };
+
   console.log('initialReduxState will be sent to App Home', initialReduxState);
 
   return {
@@ -70,9 +78,21 @@ export const getServerSideProps = async (context) => {
 const Home = (props) => {
   console.log('Home');
   const {initialReduxState} = props;
-  const initialUser = initialReduxState.user;
-  const dispatch = useDispatch();
-  dispatch(userActions.setVisitCounts({ visitCounts: initialUser.visitCounts }));
+  // const initialUserVisitCounts = initialReduxState.visitCounts;
+
+  // let userType = '';
+  // if (initialUserVisitCounts < 3) {
+  //   userType = 'guest';
+  // }
+  // else if (initialUserVisitCounts >= 3 && initialUserVisitCounts < 5) {
+  //   userType = 'friend';
+  // } else if (initialUserVisitCounts >= 5) {
+  //   userType = 'familyMember';
+  // }
+
+  // const dispatch = useDispatch();
+  // dispatch(userActions.setUserType({ userType: userType }));
+  // console.log(useSelector(selectUserType));
 
   return (
     <>

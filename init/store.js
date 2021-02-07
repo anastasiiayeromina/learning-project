@@ -5,11 +5,10 @@ import {
   createStore,
   applyMiddleware,
 } from 'redux';
-
+import * as R from 'ramda';
 // Middleware
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
-
 // Instruments
 import { rootReducer } from './rootReducer';
 import { rootSaga } from './rootSaga';
@@ -31,12 +30,19 @@ const bindMiddleware = (middleware) => {
   return composeWithDevTools(applyMiddleware(...middleware));
 }
 
-export const initStore = (preloadedState = {}) => {
+export const initStore = (preloadedState) => {
   console.log('initStore: preloadedState', preloadedState);
+
+  const defaultState = preloadedState ? createStore(rootReducer).getState() : {};
+  const currentState = R.mergeDeepRight(
+    defaultState,
+    preloadedState,
+  );
+
   const sagaMiddleware = createSagaMiddleware();
   const initedStore = createStore(
     rootReducer,
-    preloadedState,
+    currentState,
     bindMiddleware([ sagaMiddleware ]),
   );
 
@@ -52,10 +58,11 @@ export const initializeStore = (preloadedState = {}) => {
   console.log('initializeStore: initializedStore', initializedStore.getState());
 
   if (preloadedState && store) {
-    initializedStore = initStore({
-      ...preloadedState,
-      ...store.getState(),
-    });
+    console.log('preloadedState && store: store.getState()', store.getState());
+    initializedStore = initStore(R.mergeDeepRight(
+      store.getState(),
+      preloadedState,
+    ));
 
     store = undefined;
   }

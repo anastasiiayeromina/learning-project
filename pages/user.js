@@ -13,6 +13,7 @@ import { getParsedFile } from '../helpers/getParsedFile';
 import { getUniqueId } from "../helpers/getUniqueId";
 import { getUserStatus } from '../helpers/getUserStatus';
 import { useDispatch } from 'react-redux';
+import { selectUserId, selectUserType, selectVisitCounts } from '../bus/user/selectors';
 
 export const getServerSideProps = async (context) => {
   const store = await initialDispatcher(context, initializeStore());
@@ -29,9 +30,15 @@ export const getServerSideProps = async (context) => {
 
   store.dispatch(userActions.fillUser({userId}));
   store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
+  // store.dispatch(userActions.setUserType({userType}));
 
-  const initialReduxState = store.getState();
+  const initialReduxState = {
+    user: {
+      userId: selectUserId(store.getState()),
+      visitCounts: selectVisitCounts(store.getState()),
+      // userType: selectUserType(store.getState()),
+    }
+  };
 
   return {
     props: {
@@ -42,10 +49,20 @@ export const getServerSideProps = async (context) => {
 
 const User = (props) => {
   const {initialReduxState} = props;
-  const initialUser = initialReduxState.user;
-  const dispatch = useDispatch();
-  dispatch(userActions.setVisitCounts({ visitCounts: initialUser.visitCounts }));
+  // const initialUserVisitCounts = initialReduxState.visitCounts;
 
+  // let userType = '';
+  // if (initialUserVisitCounts < 3) {
+  //   userType = 'guest';
+  // }
+  // else if (initialUserVisitCounts >= 3 && initialUserVisitCounts < 5) {
+  //   userType = 'friend';
+  // } else if (initialUserVisitCounts >= 5) {
+  //   userType = 'familyMember';
+  // }
+
+  // const dispatch = useDispatch();
+  // dispatch(userActions.setUserType({ userType: userType }));
 
   return (
     <>
