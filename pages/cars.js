@@ -4,22 +4,34 @@ import nookies from 'nookies';
 // Reducer
 import { initialDispatcher } from "../init/initialDispatcher";
 import { initializeStore } from "../init/store";
-import { userActions } from '../bus/user/actions';
-// Components
-import UserInfo from "../components/user-info";
-import Menu from '../components/menu';
+import { carsActions } from '../bus/cars/actions';
+import { selectCars } from '../bus/cars/selectors';
+import { selectUserType } from '../bus/user/selectors'; 
 // Helpers
 import { getParsedFile } from '../helpers/getParsedFile';
-import { getUniqueId } from "../helpers/getUniqueId";
+import { changeDate } from '../helpers/changeDate';
+// Components
+import CarsComponent from '../components/cars-component';
+import { userActions } from '../bus/user/actions';
 import { getUserStatus } from '../helpers/getUserStatus';
-import { selectUserId, selectUserType, selectVisitCounts } from '../bus/user/selectors';
 
 export const getServerSideProps = async (context) => {
   const store = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
   const cookies = nookies.get(context);
-  const userId = cookies.userId || getUniqueId();
+  const userId = cookies.userId || null;
+
+  let carsData = {};
+
+  try {
+    carsData = getParsedFile(await promises.readFile('./cars.json', 'utf-8'));
+
+    changeDate(carsData, './cars.json');
+  }
+  catch (error) {
+    console.error(error);
+  }
 
   const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
   const {
@@ -30,13 +42,20 @@ export const getServerSideProps = async (context) => {
   store.dispatch(userActions.fillUser({userId}));
   store.dispatch(userActions.setVisitCounts({visitCounts}));
   store.dispatch(userActions.setUserType({userType}));
+  store.dispatch(carsActions.fillCars(carsData));
+
+  const initialUserType = selectUserType(store.getState());
+
+  if (initialUserType !== 'familyMember') {
+    return {
+      redirect: {
+        destination: '/',
+      }
+    }
+  }
 
   const initialReduxState = {
-    user: {
-      userId: selectUserId(store.getState()),
-      visitCounts: selectVisitCounts(store.getState()),
-      userType: selectUserType(store.getState()),
-    }
+    cars: selectCars(store.getState()),
   };
 
   return {
@@ -44,18 +63,17 @@ export const getServerSideProps = async (context) => {
       initialReduxState,
     }
   }
-};
+}
 
-const User = (props) => {
-  const {initialReduxState} = props;
+const Cars = (props) => {
+  const {} = props;
 
   return (
     <>
-      <Menu />
-      <h1>User page</h1>
-      <UserInfo/>
+      <h1>Cars</h1>
+      <CarsComponent/>
     </>
   );
 };
 
-export default User;
+export default Cars;

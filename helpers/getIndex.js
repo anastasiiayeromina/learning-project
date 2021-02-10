@@ -5,3 +5,11 @@ export const getCookieIndex = (data, userId) => {
     }
   });
 }
+
+export const getSlugIndex = (data, slug) => {
+  return data.findIndex((element, index, array) => {
+    if (element && slug) {
+      return slug === element.id;
+    }
+  });
+}

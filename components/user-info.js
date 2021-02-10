@@ -1,3 +1,4 @@
+import { setCookie } from 'nookies';
 import { useDispatch, useSelector } from 'react-redux';
 import { userActions } from '../bus/user/actions';
 import { selectUserId, selectVisitCounts, selectUserType } from '../bus/user/selectors';
@@ -13,6 +14,7 @@ const UserInfo = (props) => {
 
   const onClick = () => {
     dispatch(userActions.setUserType({ userType: getIncreasedUserType(userType)}));
+    setCookie(null, 'isIncreased', true);
   }
 
   return (

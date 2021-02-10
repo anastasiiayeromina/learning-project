@@ -1,27 +1,31 @@
 // Core
 import fs from 'fs';
 import nookies from 'nookies';
+import Link from 'next/link';
+import { useDispatch, useSelector } from 'react-redux';
 // Reducer
 import { initialDispatcher } from "../init/initialDispatcher";
 import { initializeStore } from "../init/store";
+import { userActions } from '../bus/user/actions';
+import { selectUserId, selectUserType, selectVisitCounts } from '../bus/user/selectors';
 // Helpers
 import { getParsedFile } from '../helpers/getParsedFile';
 import { getUserStatus } from '../helpers/getUserStatus';
-import { getCookieIndex } from '../helpers/getCookieIndex';
-// Components
-import News from '../components/news';
-import Discounts from '../components/discounts';
-import Cars from '../components/cars';
-import Menu from '../components/menu';
-import { userActions } from '../bus/user/actions';
+import { getCookieIndex } from '../helpers/getIndex';
+import { changeDate } from '../helpers/changeDate';
 import { getUniqueId } from '../helpers/getUniqueId';
-import UserInfo from '../components/user-info';
-import { useDispatch, useSelector } from 'react-redux';
 import { addUser, updateUser } from '../helpers/user';
-import { selectUserId, selectUserType, selectVisitCounts } from '../bus/user/selectors';
+// Components
+import Menu from '../components/menu';
+import UserInfo from '../components/user-info';
+import { newsActions } from '../bus/news/actions';
+import { discountsActions } from '../bus/discounts/actions';
+import { carsActions } from '../bus/cars/actions';
+import { selectNews } from '../bus/news/selectors';
+import { selectDiscounts } from '../bus/discounts/selectors';
+import { selectCars } from '../bus/cars/selectors';
 
 export const getServerSideProps = async (context) => {
-  console.log('getServerSideProps: Dashboard');
   const store = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
@@ -31,15 +35,6 @@ export const getServerSideProps = async (context) => {
   let newsData = {};
   let discountsData = {};
   let carsData = {};
-
-  const changeDate = (data, fileName) => {
-    const updatedData = data.map((item) => {
-      item.dateOfReceiving = `${new Date()}`;
-      return item;
-    });
-    promises.writeFile(fileName, '');
-    promises.writeFile(fileName, JSON.stringify(updatedData, null, 4));
-  };
 
   try {
     const data = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
@@ -76,65 +71,101 @@ export const getServerSideProps = async (context) => {
   store.dispatch(userActions.fillUser({userId}));
   store.dispatch(userActions.setVisitCounts({visitCounts}));
   store.dispatch(userActions.setUserType({userType}));
+  store.dispatch(newsActions.fillNews(newsData));
+  store.dispatch(discountsActions.fillDiscounts(discountsData));
+  store.dispatch(carsActions.fillCars(carsData));
 
   const initialReduxState = {
     user: {
       userId: selectUserId(store.getState()),
       visitCounts: selectVisitCounts(store.getState()),
       userType: selectUserType(store.getState()),
-    }
+    },
+    news: selectNews(store.getState()),
+    discounts: selectDiscounts(store.getState()),
+    cars: selectCars(store.getState()),
   };
-  console.log('initialReduxState will be sent to App Dashboard', initialReduxState);
 
   return {
     props: {
-      newsData,
-      discountsData,
-      carsData,
       initialReduxState,
     }
   }
 }
 
 const Dashboard = (props) => {
-  console.log('Dashboard');
-  const {newsData, discountsData, carsData, initialReduxState} = props;
-  // const initialUserVisitCounts = initialReduxState.visitCounts;
+  const {initialReduxState} = props;
+  const news = useSelector(selectNews);
+  const discounts = useSelector(selectDiscounts);
+  const cars = useSelector(selectCars);
 
-  // let userType = '';
-  // if (initialUserVisitCounts < 3) {
-  //   userType = 'guest';
-  // }
-  // else if (initialUserVisitCounts >= 3 && initialUserVisitCounts < 5) {
-  //   userType = 'friend';
-  // } else if (initialUserVisitCounts >= 5) {
-  //   userType = 'familyMember';
-  // }
+  const newsListJSX = news && (
+    <ul>
+      {news.map((item) => {
+        return (
+          <li>
+            <Link href={`/news/${item.id}`}>
+              <a>{item.id}</a>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
-  // const dispatch = useDispatch();
-  // dispatch(userActions.setUserType({ userType: userType }));
-  
-  const {user} = useSelector((state) => state);
+  const discountsListJSX = discounts && (
+    <ul>
+      {discounts.map((item) => {
+        return (
+          <li>
+            <Link href={`/discounts/${item.id}`}>
+              <a>{item.id}</a>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
-  const hasCars = user.userType === 'familyMember';
-  const hasDiscounts = user.userType === 'friend' || hasCars;
-  const hasNews = user.userType === 'guest' || hasDiscounts;
-
-  const newsJSX = hasNews && 
-    <News data={newsData}/>;
-  const discountsJSX = hasDiscounts &&
-    <Discounts data={discountsData} />;
-  const carsJSX = hasCars &&
-    <Cars data={carsData} />;
+  const carsListJSX = cars && (
+    <ul>
+      {cars.map((item) => {
+        return (
+          <li>
+            <Link href={`/cars/${item.id}`}>
+              <a>{item.id}</a>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
   return (
     <>
       <Menu />
       <UserInfo/>
       <h1>Dashboard</h1>
-      {newsJSX}
-      {discountsJSX}
-      {carsJSX}
+      <ol>
+        <li>
+          <Link href='/news'>
+            <a>News</a>
+          </Link>
+          {newsListJSX}
+        </li>
+        <li>
+          <Link href='/discounts'>
+            <a>Discounts</a>
+          </Link>
+          {discountsListJSX}
+        </li>
+        <li>
+          <Link href='/cars'>
+            <a>Cars</a>
+          </Link>
+          {carsListJSX}
+        </li>
+      </ol>
     </>
   );
 }

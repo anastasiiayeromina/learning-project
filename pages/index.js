@@ -8,7 +8,7 @@ import { userActions } from "../bus/user/actions";
 import { selectVisitCounts, selectUserId, selectUserType } from '../bus/user/selectors';
 // Helpers
 import { getUniqueId } from '../helpers/getUniqueId';
-import { getCookieIndex } from '../helpers/getCookieIndex';
+import { getCookieIndex } from '../helpers/getIndex';
 import { getParsedFile } from '../helpers/getParsedFile';
 import { getUserStatus } from '../helpers/getUserStatus';
 import { addUser, updateUser } from '../helpers/user';
@@ -16,10 +16,8 @@ import { addUser, updateUser } from '../helpers/user';
 import Message from '../components/message';
 import Menu from '../components/menu';
 import UserInfo from '../components/user-info';
-import { useDispatch, useSelector } from 'react-redux';
 
 export const getServerSideProps = async (context) => {
-  console.log('getServerSideProps: Home');
   const store = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
@@ -66,8 +64,6 @@ export const getServerSideProps = async (context) => {
     }
   };
 
-  console.log('initialReduxState will be sent to App Home', initialReduxState);
-
   return {
     props: {
       initialReduxState
@@ -76,23 +72,7 @@ export const getServerSideProps = async (context) => {
 }
 
 const Home = (props) => {
-  console.log('Home');
   const {initialReduxState} = props;
-  // const initialUserVisitCounts = initialReduxState.visitCounts;
-
-  // let userType = '';
-  // if (initialUserVisitCounts < 3) {
-  //   userType = 'guest';
-  // }
-  // else if (initialUserVisitCounts >= 3 && initialUserVisitCounts < 5) {
-  //   userType = 'friend';
-  // } else if (initialUserVisitCounts >= 5) {
-  //   userType = 'familyMember';
-  // }
-
-  // const dispatch = useDispatch();
-  // dispatch(userActions.setUserType({ userType: userType }));
-  // console.log(useSelector(selectUserType));
 
   return (
     <>

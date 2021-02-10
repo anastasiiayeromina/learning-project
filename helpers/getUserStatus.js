@@ -1,4 +1,4 @@
-import { getCookieIndex } from '../helpers/getCookieIndex'
+import { getCookieIndex } from './getIndex'
 
 export const getUserStatus = (userData, userId) => {
   const userCookieIndex = getCookieIndex(userData, userId);
