@@ -1,6 +1,7 @@
 //Core
 import fs from 'fs';
 import nookies from 'nookies';
+import R from 'ramda';
 //Redux
 import { initialDispatcher } from '../../init/initialDispatcher';
 import { initializeStore } from '../../init/store';
@@ -16,9 +17,10 @@ import DiscountComponent from '../../components/discount-component';
 import { getSlugIndex } from '../../helpers/getIndex';
 import { getParsedFile } from '../../helpers/getParsedFile';
 import { getUserStatus } from '../../helpers/getUserStatus';
+import { serverDispatch } from '../../helpers/serverDispatch';
 
 export const getServerSideProps = async (context) => {
-  const store = await initialDispatcher(context, initializeStore());
+  const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
   const cookies = nookies.get(context);
@@ -39,10 +41,12 @@ export const getServerSideProps = async (context) => {
     visitCounts,
   } = getUserStatus(userData, userId);
 
-  store.dispatch(userActions.fillUser({userId}));
-  store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
-  store.dispatch(discountsActions.fillDiscounts(discountsData));
+  await serverDispatch(store, (dispatch) => {
+    dispatch(userActions.fillUser({userId}));
+    dispatch(userActions.setVisitCounts({visitCounts}));
+    dispatch(userActions.setUserType({userType}));
+    dispatch(discountsActions.fillDiscounts(discountsData));
+  });
 
   const initiaDiscounts = selectDiscounts(store.getState());
   const slug = context.query.slug;
@@ -66,9 +70,14 @@ export const getServerSideProps = async (context) => {
     }
   }
 
-  const initialReduxState = {
+  const currentPageReduxState = {
     discounts: initiaDiscounts,
   };
+
+  const initialReduxState = R.mergeDeepRight(
+    stateUpdates,
+    currentPageReduxState,
+  );
 
   return {
     props: {

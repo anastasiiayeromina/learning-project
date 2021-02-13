@@ -1,8 +1,23 @@
 // Actions
 
-export const initialDispatcher = async (context, store) => {
-  // store.dispatch();
+import { serverDispatch } from "../helpers/serverDispatch";
 
-  return store;
+export const initialDispatcher = async (context, store) => {
+  await serverDispatch(store, (dispatch) => {
+    // dispatch(profileActions.setVerified());
+  });
+
+  // const state = store.getState();
+
+  const stateUpdates = {
+  //   profile: {
+  //     isVerified: selectIsVerified(true),
+  //   }
+  }
+
+  return {
+    store,
+    stateUpdates,
+  };
 }
 

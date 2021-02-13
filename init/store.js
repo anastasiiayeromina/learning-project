@@ -31,7 +31,6 @@ const bindMiddleware = (middleware) => {
 }
 
 export const initStore = (preloadedState) => {
-  console.log('initStore: preloadedState', preloadedState);
 
   const defaultState = preloadedState ? createStore(rootReducer).getState() : {};
   const currentState = R.mergeDeepRight(
@@ -47,18 +46,14 @@ export const initStore = (preloadedState) => {
   );
 
   initedStore.sagaTask = sagaMiddleware.run(rootSaga);
-  console.log('initStore: initedStore.getState()', initedStore.getState());
 
   return initedStore;
 };
 
 export const initializeStore = (preloadedState = {}) => {
-  console.log('initializeStore: preloadedState', preloadedState);
   let initializedStore = store || initStore(preloadedState);
-  console.log('initializeStore: initializedStore', initializedStore.getState());
 
   if (preloadedState && store) {
-    console.log('preloadedState && store: store.getState()', store.getState());
     initializedStore = initStore(R.mergeDeepRight(
       store.getState(),
       preloadedState,
@@ -72,7 +67,6 @@ export const initializeStore = (preloadedState = {}) => {
   }
 
   if (!store) {
-    console.log('!store - store', store);
     store = initializedStore;
   }
 

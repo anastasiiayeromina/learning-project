@@ -1,23 +1,25 @@
 //Core
 import fs from 'fs';
 import nookies from 'nookies';
+import R from 'ramda';
 //Redux
 import { initialDispatcher } from '../../init/initialDispatcher';
 import { initializeStore } from '../../init/store';
 import { carsActions } from '../../bus/cars/actions';
 import { selectCars } from '../../bus/cars/selectors';
+import { selectUserType } from '../../bus/user/selectors';
+import { userActions } from '../../bus/user/actions';
 //Components
 import BackLink from '../../components/back-link';
 import CarComponent from '../../components/car-component';
 //Helpers
 import { getSlugIndex } from '../../helpers/getIndex';
 import { getParsedFile } from '../../helpers/getParsedFile';
-import { userActions } from '../../bus/user/actions';
 import { getUserStatus } from '../../helpers/getUserStatus';
-import { selectUserType } from '../../bus/user/selectors';
+import { serverDispatch } from '../../helpers/serverDispatch';
 
 export const getServerSideProps = async (context) => {
-  const store = await initialDispatcher(context, initializeStore());
+  const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
   const cookies = nookies.get(context);
@@ -38,10 +40,12 @@ export const getServerSideProps = async (context) => {
     visitCounts,
   } = getUserStatus(userData, userId);
 
-  store.dispatch(userActions.fillUser({userId}));
-  store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
-  store.dispatch(carsActions.fillCars(carsData));
+  await serverDispatch(store, (dispatch) => {
+    dispatch(userActions.fillUser({userId}));
+    dispatch(userActions.setVisitCounts({visitCounts}));
+    dispatch(userActions.setUserType({userType}));
+    dispatch(carsActions.fillCars(carsData));
+  });
 
   const initialCars = selectCars(store.getState());
   const slug = context.query.slug;
@@ -54,7 +58,6 @@ export const getServerSideProps = async (context) => {
       }
     }
   }
-
   const initialUserType = selectUserType(store.getState());
 
   if (initialUserType !== 'familyMember') {
@@ -65,9 +68,14 @@ export const getServerSideProps = async (context) => {
     }
   }
 
-  const initialReduxState = {
+  const currentPageReduxState = {
     cars: initialCars,
   };
+
+  const initialReduxState = R.mergeDeepRight(
+    stateUpdates,
+    currentPageReduxState,
+  );
 
   return {
     props: {

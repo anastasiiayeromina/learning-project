@@ -1,10 +1,13 @@
 // Core
 import fs from 'fs';
 import nookies from 'nookies';
+import R from 'ramda';
+import { END } from 'redux-saga';
 // Reducer
 import { initialDispatcher } from "../init/initialDispatcher";
 import { initializeStore } from "../init/store";
 import { userActions } from "../bus/user/actions";
+import { asteroidsActions } from '../bus/asteroids/actions';
 import { selectVisitCounts, selectUserId, selectUserType } from '../bus/user/selectors';
 // Helpers
 import { getUniqueId } from '../helpers/getUniqueId';
@@ -12,13 +15,16 @@ import { getCookieIndex } from '../helpers/getIndex';
 import { getParsedFile } from '../helpers/getParsedFile';
 import { getUserStatus } from '../helpers/getUserStatus';
 import { addUser, updateUser } from '../helpers/user';
+import { serverDispatch } from '../helpers/serverDispatch';
+import { disableSaga } from '../helpers/disableSaga';
 // Components
 import Message from '../components/message';
 import Menu from '../components/menu';
-import UserInfo from '../components/user-info';
+import AsteroidsComponent from '../components/asteroids-component';
+import { selectAsteroidsEntries } from '../bus/asteroids/selectors';
 
 export const getServerSideProps = async (context) => {
-  const store = await initialDispatcher(context, initializeStore());
+  const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
   const cookies = nookies.get(context);
@@ -52,17 +58,32 @@ export const getServerSideProps = async (context) => {
     visitCounts
   } = getUserStatus(userData, userId);
 
-  store.dispatch(userActions.fillUser({userId}));
-  store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
+  await serverDispatch(store, (dispatch) => {
+    dispatch(userActions.fillUser({userId}));
+    dispatch(userActions.setVisitCounts({visitCounts}));
+    dispatch(userActions.setUserType({userType}));
+    dispatch(asteroidsActions.loadAsteroidsAsync());
 
-  const initialReduxState = {
+    dispatch(END);
+  });
+
+  await disableSaga(store);
+
+  const currentPageReduxState = {
     user: {
       userId: selectUserId(store.getState()),
       visitCounts: selectVisitCounts(store.getState()),
       userType: selectUserType(store.getState()),
+    },
+    asteroids: {
+      entries: selectAsteroidsEntries(store.getState()),
     }
   };
+
+  const initialReduxState = R.mergeDeepRight(
+    stateUpdates,
+    currentPageReduxState,
+  );
 
   return {
     props: {
@@ -77,8 +98,8 @@ const Home = (props) => {
   return (
     <>
       <Menu />
-      <UserInfo/>
       <Message />
+      <AsteroidsComponent />
     </>
   )
 }

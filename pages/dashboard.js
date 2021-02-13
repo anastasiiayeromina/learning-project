@@ -1,8 +1,9 @@
 // Core
 import fs from 'fs';
 import nookies from 'nookies';
+import R from 'ramda';
 import Link from 'next/link';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 // Reducer
 import { initialDispatcher } from "../init/initialDispatcher";
 import { initializeStore } from "../init/store";
@@ -15,9 +16,9 @@ import { getCookieIndex } from '../helpers/getIndex';
 import { changeDate } from '../helpers/changeDate';
 import { getUniqueId } from '../helpers/getUniqueId';
 import { addUser, updateUser } from '../helpers/user';
+import { serverDispatch } from '../helpers/serverDispatch';
 // Components
 import Menu from '../components/menu';
-import UserInfo from '../components/user-info';
 import { newsActions } from '../bus/news/actions';
 import { discountsActions } from '../bus/discounts/actions';
 import { carsActions } from '../bus/cars/actions';
@@ -26,7 +27,7 @@ import { selectDiscounts } from '../bus/discounts/selectors';
 import { selectCars } from '../bus/cars/selectors';
 
 export const getServerSideProps = async (context) => {
-  const store = await initialDispatcher(context, initializeStore());
+  const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
   const promises = fs.promises;
   const cookies = nookies.get(context);
@@ -68,14 +69,16 @@ export const getServerSideProps = async (context) => {
     visitCounts,
   } = getUserStatus(userData, userId);
 
-  store.dispatch(userActions.fillUser({userId}));
-  store.dispatch(userActions.setVisitCounts({visitCounts}));
-  store.dispatch(userActions.setUserType({userType}));
-  store.dispatch(newsActions.fillNews(newsData));
-  store.dispatch(discountsActions.fillDiscounts(discountsData));
-  store.dispatch(carsActions.fillCars(carsData));
+  await serverDispatch(store, (dispatch) => {
+    dispatch(userActions.fillUser({userId}));
+    dispatch(userActions.setVisitCounts({visitCounts}));
+    dispatch(userActions.setUserType({userType}));
+    dispatch(newsActions.fillNews(newsData));
+    dispatch(discountsActions.fillDiscounts(discountsData));
+    dispatch(carsActions.fillCars(carsData));
+  });
 
-  const initialReduxState = {
+  const currentPageReduxState = {
     user: {
       userId: selectUserId(store.getState()),
       visitCounts: selectVisitCounts(store.getState()),
@@ -85,6 +88,11 @@ export const getServerSideProps = async (context) => {
     discounts: selectDiscounts(store.getState()),
     cars: selectCars(store.getState()),
   };
+
+  const initialReduxState = R.mergeDeepRight(
+    stateUpdates,
+    currentPageReduxState,
+  );
 
   return {
     props: {
@@ -103,7 +111,7 @@ const Dashboard = (props) => {
     <ul>
       {news.map((item) => {
         return (
-          <li>
+          <li key={item.id}>
             <Link href={`/news/${item.id}`}>
               <a>{item.id}</a>
             </Link>
@@ -117,7 +125,7 @@ const Dashboard = (props) => {
     <ul>
       {discounts.map((item) => {
         return (
-          <li>
+          <li key={item.id}>
             <Link href={`/discounts/${item.id}`}>
               <a>{item.id}</a>
             </Link>
@@ -131,7 +139,7 @@ const Dashboard = (props) => {
     <ul>
       {cars.map((item) => {
         return (
-          <li>
+          <li key={item.id}>
             <Link href={`/cars/${item.id}`}>
               <a>{item.id}</a>
             </Link>
@@ -144,7 +152,6 @@ const Dashboard = (props) => {
   return (
     <>
       <Menu />
-      <UserInfo/>
       <h1>Dashboard</h1>
       <ol>
         <li>
