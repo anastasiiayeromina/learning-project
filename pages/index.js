@@ -6,9 +6,11 @@ import { END } from 'redux-saga';
 // Reducer
 import { initialDispatcher } from "../init/initialDispatcher";
 import { initializeStore } from "../init/store";
+import { initApollo } from '../init/initApollo';
 import { userActions } from "../bus/user/actions";
 import { asteroidsActions } from '../bus/asteroids/actions';
 import { selectVisitCounts, selectUserId, selectUserType } from '../bus/user/selectors';
+import { selectAsteroidsEntries } from '../bus/asteroids/selectors';
 // Helpers
 import { getUniqueId } from '../helpers/getUniqueId';
 import { getCookieIndex } from '../helpers/getIndex';
@@ -21,10 +23,18 @@ import { disableSaga } from '../helpers/disableSaga';
 import Message from '../components/message';
 import Menu from '../components/menu';
 import AsteroidsComponent from '../components/asteroids-component';
-import { selectAsteroidsEntries } from '../bus/asteroids/selectors';
+import PokemonsComponent from '../components/pokemons-component';
+// Other
+import queryPokemons from '../bus/pokemons/usePokemons/gql/queryPokemons.graphql';
 
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
+
+  const initialApolloState = await initApollo(context, async (execute) => {
+    await execute({
+      query: queryPokemons,
+    });
+  });
 
   const promises = fs.promises;
   const cookies = nookies.get(context);
@@ -87,7 +97,8 @@ export const getServerSideProps = async (context) => {
 
   return {
     props: {
-      initialReduxState
+      initialReduxState,
+      initialApolloState,
     }
   }
 }
@@ -100,6 +111,7 @@ const Home = (props) => {
       <Menu />
       <Message />
       <AsteroidsComponent />
+      <PokemonsComponent />
     </>
   )
 }
