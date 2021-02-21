@@ -1,7 +1,11 @@
 // Other
+import { serverGraphqlErrorLogger } from '../helpers/serverGraphqlErrorLogger';
+import { serverGraphqlInformationLogger } from '../helpers/serverGraphqlInformationLogger';
+import { environmentVerify } from '../helpers/verifyEnvironment';
 import { initializeApollo } from './apollo';
 
 export const initApollo = async (context, executor) => {
+  const {isDevelopment} = environmentVerify();
   try {
     const apolloClient = initializeApollo({}, context);
 
@@ -9,6 +13,12 @@ export const initApollo = async (context, executor) => {
 
     const execute = async (query) => {
       try {
+        if (isDevelopment) {
+          serverGraphqlInformationLogger(query, {
+            isStarted: true,
+          });
+        }
+
         const queryResult = await apolloClient.query({
           ...query,
           context: {
@@ -20,8 +30,15 @@ export const initApollo = async (context, executor) => {
 
         return queryResult;
       } catch (err) {
-        console.log('execute err', err.message);
+        serverGraphqlErrorLogger(query, err, context);
+
         return undefined;
+      } finally {
+        if (isDevelopment) {
+          serverGraphqlInformationLogger(query, {
+            isFinished: true,
+          });
+        }
       }
     };
 
