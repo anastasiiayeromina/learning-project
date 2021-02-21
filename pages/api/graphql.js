@@ -13,6 +13,7 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     users(parent, args, context) {
+      //make REST requests here
       return [{name: 'Nextjs'}]
     },
   },
