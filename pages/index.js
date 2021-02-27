@@ -29,6 +29,8 @@ import CatsComponent from '../bus/cats/cats-component';
 // Other
 import queryPokemons from '../bus/pokemons/usePokemons/gql/queryPokemons.graphql';
 
+const PATH = path.resolve('data');
+
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
@@ -47,24 +49,24 @@ export const getServerSideProps = async (context) => {
   }
 
   try {
-    const data = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
+    const data = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
     const cookieIndex = getCookieIndex(data, userId);
     
     if (cookieIndex < 0) {
       addUser(data, userId);
   
-      await promises.writeFile(path.join(__dirname, 'data', 'users.json'), JSON.stringify(data, null, 4));
+      await promises.writeFile(`${PATH}/users.json`, JSON.stringify(data, null, 4));
     } else if (data[cookieIndex].userId === cookies.userId) {
       updateUser(data, cookieIndex);
 
-      await promises.writeFile(path.join(__dirname, 'data', 'users.json'), JSON.stringify(data, null, 4));
+      await promises.writeFile(`${PATH}/users.json`, JSON.stringify(data, null, 4));
     }
     
   } catch (error) {
       console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
   const {
     userType,
     visitCounts
