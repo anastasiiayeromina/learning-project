@@ -27,6 +27,8 @@ import { selectNews } from '../bus/news/selectors';
 import { selectDiscounts } from '../bus/discounts/selectors';
 import { selectCars } from '../bus/cars/selectors';
 
+const PATH = path.resolve('data');
+
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
@@ -37,38 +39,39 @@ export const getServerSideProps = async (context) => {
   let newsData = {};
   let discountsData = {};
   let carsData = {};
+  let userType = '';
+  let visitCounts = null;
 
   try {
-    const data = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'users.json'), 'utf-8'));
+    const data = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
     const cookieIndex = getCookieIndex(data, userId);
     
     if (cookieIndex < 0) {
       addUser(data, userId);
   
-      await promises.writeFile(path.join(__dirname, './data', 'users.json'), JSON.stringify(data, null, 4));
+      await promises.writeFile(`${PATH}/users.json`, JSON.stringify(data, null, 4));
     } else if (data[cookieIndex].userId === cookies.userId) {
       updateUser(data, cookieIndex);
 
-      await promises.writeFile(path.join(__dirname, './data', 'users.json'), JSON.stringify(data, null, 4));
+      await promises.writeFile(`${PATH}/users.json`, JSON.stringify(data, null, 4));
     }
 
-    newsData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'news.json'), 'utf-8'));
-    discountsData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'discounts.json'), 'utf-8'));
-    carsData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'cars.json'), 'utf-8'));
+    newsData = getParsedFile(await promises.readFile(`${PATH}/news.json`, 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile(`${PATH}/discounts.json`, 'utf-8'));
+    carsData = getParsedFile(await promises.readFile(`${PATH}/cars.json`, 'utf-8'));
 
-    changeDate(newsData, path.join(__dirname, './data', 'news.json'));
-    changeDate(discountsData, path.join(__dirname, './data', 'discounts.json'));
-    changeDate(carsData, path.join(__dirname, './data', 'cars.json'));
+    changeDate(newsData, `${PATH}/news.json`);
+    changeDate(discountsData, `${PATH}/discounts.json`);
+    changeDate(carsData, `${PATH}/cars.json`);
+
+    const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
+    
+    userType = getUserStatus(userData, userId).userType;
+    visitCounts = getUserStatus(userData, userId).visitCounts;
   }
   catch (error) {
     console.error(error);
   }
-
-  const userData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'users.json'), 'utf-8'));
-  const {
-    userType,
-    visitCounts,
-  } = getUserStatus(userData, userId);
 
   await serverDispatch(store, (dispatch) => {
     dispatch(userActions.fillUser({userId}));

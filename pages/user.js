@@ -17,6 +17,8 @@ import { getUniqueId } from "../helpers/getUniqueId";
 import { getUserStatus } from '../helpers/getUserStatus';
 import { serverDispatch } from '../helpers/serverDispatch';
 
+const PATH = path.resolve('data');
+
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
@@ -24,7 +26,7 @@ export const getServerSideProps = async (context) => {
   const cookies = nookies.get(context);
   const userId = cookies.userId || getUniqueId();
 
-  const userData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'users.json'), 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
   const {
     userType,
     visitCounts,

@@ -19,6 +19,8 @@ import { serverDispatch } from '../helpers/serverDispatch';
 // Components
 import DiscountsComponent from '../components/discounts-component';
 
+const PATH = path.resolve('data');
+
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
@@ -29,15 +31,15 @@ export const getServerSideProps = async (context) => {
   let discountsData = {};
 
   try {
-    discountsData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'discounts.json'), 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile(`${PATH}/discounts.json`, 'utf-8'));
 
-    changeDate(discountsData, path.join(__dirname, './data', 'discounts.json'));
+    changeDate(discountsData, `${PATH}/discounts.json`);
   }
   catch (error) {
     console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'users.json'), 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
   const {
     userType,
     visitCounts,

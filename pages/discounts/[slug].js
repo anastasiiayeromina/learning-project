@@ -20,6 +20,8 @@ import { getParsedFile } from '../../helpers/getParsedFile';
 import { getUserStatus } from '../../helpers/getUserStatus';
 import { serverDispatch } from '../../helpers/serverDispatch';
 
+const PATH = path.resolve('data');
+
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
@@ -28,19 +30,20 @@ export const getServerSideProps = async (context) => {
   const userId = cookies.userId || null;
 
   let discountsData = {};
+  let userType = '';
+  let visitCounts = null;
 
   try {
-    discountsData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'discounts.json'), 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile(`${PATH}/discounts.json`, 'utf-8'));
+
+    const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
+    
+    userType = getUserStatus(userData, userId).userType;
+    visitCounts = getUserStatus(userData, userId).visitCounts;
   }
   catch (error) {
     console.error(error);
   }
-
-  const userData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'users.json'), 'utf-8'));
-  const {
-    userType,
-    visitCounts,
-  } = getUserStatus(userData, userId);
 
   await serverDispatch(store, (dispatch) => {
     dispatch(userActions.fillUser({userId}));

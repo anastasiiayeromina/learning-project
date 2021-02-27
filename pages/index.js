@@ -49,7 +49,7 @@ export const getServerSideProps = async (context) => {
   }
 
   let userType = '';
-  let visitCounts = '';
+  let visitCounts = null;
 
   try {
     const data = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));

@@ -19,6 +19,8 @@ import { getParsedFile } from '../../helpers/getParsedFile';
 import { getUserStatus } from '../../helpers/getUserStatus';
 import { serverDispatch } from '../../helpers/serverDispatch';
 
+const PATH = path.resolve('data');
+
 export const getServerSideProps = async (context) => {
   const {store, stateUpdates} = await initialDispatcher(context, initializeStore());
 
@@ -27,19 +29,20 @@ export const getServerSideProps = async (context) => {
   const userId = cookies.userId || null;
 
   let carsData = {};
+  let userType = '';
+  let visitCounts = null;
 
   try {
-    carsData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'cars.json'), 'utf-8'));
+    carsData = getParsedFile(await promises.readFile(`${PATH}/cars.json`, 'utf-8'));
+
+    const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
+    
+    userType = getUserStatus(userData, userId).userType;
+    visitCounts = getUserStatus(userData, userId).visitCounts;
   }
   catch (error) {
     console.error(error);
   }
-
-  const userData = getParsedFile(await promises.readFile(path.join(__dirname, './data', 'users.json'), 'utf-8'));
-  const {
-    userType,
-    visitCounts,
-  } = getUserStatus(userData, userId);
 
   await serverDispatch(store, (dispatch) => {
     dispatch(userActions.fillUser({userId}));
