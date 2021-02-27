@@ -1,6 +1,7 @@
 // Core
 import fs from 'fs';
 import nookies from 'nookies';
+import path from 'path';
 import R from 'ramda';
 // Reducer
 import { initialDispatcher } from "../init/initialDispatcher";
@@ -28,15 +29,15 @@ export const getServerSideProps = async (context) => {
   let discountsData = {};
 
   try {
-    discountsData = getParsedFile(await promises.readFile('./data/discounts.json', 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'discounts.json'), 'utf-8'));
 
-    changeDate(discountsData, './data/discounts.json');
+    changeDate(discountsData, path.join(__dirname, 'data', 'discounts.json'));
   }
   catch (error) {
     console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
   const {
     userType,
     visitCounts,

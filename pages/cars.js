@@ -1,5 +1,6 @@
 // Core
 import fs from 'fs';
+import path from 'path';
 import nookies from 'nookies';
 import R from 'ramda';
 // Reducer
@@ -27,7 +28,7 @@ export const getServerSideProps = async (context) => {
   let carsData = {};
 
   try {
-    carsData = getParsedFile(await promises.readFile('./data/cars.json', 'utf-8'));
+    carsData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'cars.json'), 'utf-8'));
 
     changeDate(carsData, './data/cars.json');
   }
@@ -35,7 +36,7 @@ export const getServerSideProps = async (context) => {
     console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
   const {
     userType,
     visitCounts,

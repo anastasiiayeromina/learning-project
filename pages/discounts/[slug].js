@@ -1,5 +1,6 @@
 //Core
 import fs from 'fs';
+import path from 'path';
 import nookies from 'nookies';
 import R from 'ramda';
 //Redux
@@ -29,13 +30,13 @@ export const getServerSideProps = async (context) => {
   let discountsData = {};
 
   try {
-    discountsData = getParsedFile(await promises.readFile('./data/discounts.json', 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'discounts.json'), 'utf-8'));
   }
   catch (error) {
     console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
   const {
     userType,
     visitCounts,

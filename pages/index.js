@@ -1,6 +1,7 @@
 // Core
 import fs from 'fs';
 import nookies from 'nookies';
+import path from 'path';
 import R from 'ramda';
 import { END } from 'redux-saga';
 // Reducer
@@ -46,24 +47,24 @@ export const getServerSideProps = async (context) => {
   }
 
   try {
-    const data = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
+    const data = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
     const cookieIndex = getCookieIndex(data, userId);
     
     if (cookieIndex < 0) {
       addUser(data, userId);
   
-      await promises.writeFile('./data/users.json', JSON.stringify(data, null, 4));
+      await promises.writeFile(path.join(__dirname, 'data', 'users.json'), JSON.stringify(data, null, 4));
     } else if (data[cookieIndex].userId === cookies.userId) {
       updateUser(data, cookieIndex);
 
-      await promises.writeFile('./data/users.json', JSON.stringify(data, null, 4));
+      await promises.writeFile(path.join(__dirname, 'data', 'users.json'), JSON.stringify(data, null, 4));
     }
     
   } catch (error) {
       console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile(path.join(__dirname, 'data', 'users.json'), 'utf-8'));
   const {
     userType,
     visitCounts
