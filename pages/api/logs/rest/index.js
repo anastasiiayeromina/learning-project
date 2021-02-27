@@ -10,7 +10,7 @@ export default async (req, res) => {
   const {userId} = query;
   
   if (req.method === 'POST') {
-    await fse.writeFile(`${PATH}/${req.body.logId}.json`, JSON.stringify(req.body), 'utf-8');
+    await fse.writeFile(path.join(__dirname, 'logs/rest', `${req.body.logId}.json`), JSON.stringify(req.body), 'utf-8');
 
     res.status(201).json({ name: 'POST response', message: `created at ${new Date().toISOString()}` });
   } else if (req.method === 'GET') {
