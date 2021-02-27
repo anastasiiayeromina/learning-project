@@ -28,15 +28,15 @@ export const getServerSideProps = async (context) => {
   let discountsData = {};
 
   try {
-    discountsData = getParsedFile(await promises.readFile('./discounts.json', 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile('./data/discounts.json', 'utf-8'));
 
-    changeDate(discountsData, './discounts.json');
+    changeDate(discountsData, './data/discounts.json');
   }
   catch (error) {
     console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
   const {
     userType,
     visitCounts,

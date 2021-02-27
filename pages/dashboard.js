@@ -38,32 +38,32 @@ export const getServerSideProps = async (context) => {
   let carsData = {};
 
   try {
-    const data = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+    const data = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
     const cookieIndex = getCookieIndex(data, userId);
     
     if (cookieIndex < 0) {
       addUser(data, userId);
   
-      await promises.writeFile('./users.json', JSON.stringify(data, null, 4));
+      await promises.writeFile('./data/users.json', JSON.stringify(data, null, 4));
     } else if (data[cookieIndex].userId === cookies.userId) {
       updateUser(data, cookieIndex);
 
-      await promises.writeFile('./users.json', JSON.stringify(data, null, 4));
+      await promises.writeFile('./data/users.json', JSON.stringify(data, null, 4));
     }
 
-    newsData = getParsedFile(await promises.readFile('./news.json', 'utf-8'));
-    discountsData = getParsedFile(await promises.readFile('./discounts.json', 'utf-8'));
-    carsData = getParsedFile(await promises.readFile('./cars.json', 'utf-8'));
+    newsData = getParsedFile(await promises.readFile('./data/news.json', 'utf-8'));
+    discountsData = getParsedFile(await promises.readFile('./data/discounts.json', 'utf-8'));
+    carsData = getParsedFile(await promises.readFile('./data/cars.json', 'utf-8'));
 
-    changeDate(newsData, './news.json');
-    changeDate(discountsData, './discounts.json');
-    changeDate(carsData, './cars.json');
+    changeDate(newsData, './data/news.json');
+    changeDate(discountsData, './data/discounts.json');
+    changeDate(carsData, './data/cars.json');
   }
   catch (error) {
     console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
   const {
     userType,
     visitCounts,

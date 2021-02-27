@@ -23,7 +23,7 @@ export const getServerSideProps = async (context) => {
   const cookies = nookies.get(context);
   const userId = cookies.userId || getUniqueId();
 
-  const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
   const {
     userType,
     visitCounts,

@@ -46,24 +46,24 @@ export const getServerSideProps = async (context) => {
   }
 
   try {
-    const data = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+    const data = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
     const cookieIndex = getCookieIndex(data, userId);
     
     if (cookieIndex < 0) {
       addUser(data, userId);
   
-      await promises.writeFile('./users.json', JSON.stringify(data, null, 4));
+      await promises.writeFile('./data/users.json', JSON.stringify(data, null, 4));
     } else if (data[cookieIndex].userId === cookies.userId) {
       updateUser(data, cookieIndex);
 
-      await promises.writeFile('./users.json', JSON.stringify(data, null, 4));
+      await promises.writeFile('./data/users.json', JSON.stringify(data, null, 4));
     }
     
   } catch (error) {
       console.error(error);
   }
 
-  const userData = getParsedFile(await promises.readFile('./users.json', 'utf-8'));
+  const userData = getParsedFile(await promises.readFile('./data/users.json', 'utf-8'));
   const {
     userType,
     visitCounts
