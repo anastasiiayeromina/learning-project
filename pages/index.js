@@ -70,7 +70,7 @@ export const getServerSideProps = async (context) => {
   const {
     userType,
     visitCounts
-  } = getUserStatus(userData, userId);
+  } = await getUserStatus(userData, userId);
 
   await serverDispatch(store, (dispatch) => {
     dispatch(userActions.fillUser({userId}));
