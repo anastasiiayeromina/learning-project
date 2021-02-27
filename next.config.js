@@ -1,5 +1,7 @@
 const { DuplicatesPlugin } = require('inspectpack/plugin');
 const path = require('path');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CleanCss = require('clean-css');
 const withPlugins = require('next-compose-plugins');
 const withTM = require('next-transpile-modules')([
   // These modules doesn't support IE11:
@@ -9,7 +11,12 @@ const withTM = require('next-transpile-modules')([
   'is-stream',
 ]);
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 module.exports = withPlugins([
+  [withBundleAnalyzer, {}],
   [withTM, {}]
 ], {
   webpack: (config, {isServer}) => {
@@ -26,14 +33,35 @@ module.exports = withPlugins([
     //   ...updatedAliases,
     // };
 
-    // if (isProduction) {
+    if (isProduction) {
     //   config.plugins.push(
     //     new DuplicatesPlugin({
     //       verbose: true,
     //       emitErrors: true,
     //     })
     //   )
-    // }
+
+      config.optimization.minimizer.push(
+        new OptimizeCssAssetsPlugin({
+          assetNameRegExp: /\.css$/g,
+          cssProcessor: CleanCss,
+          cssProcessorOptions: {
+            level: {
+              1: {
+                all: true,
+                normalizeUrls: false,
+              },
+              2: {
+                restructureRules: true,
+                removeUnusedAtRules: true,
+                skipProperties: [ 'border-top', 'border-bottom' ],
+              },
+            },
+          },
+          canPrint: true,
+        }),
+      );
+    }
 
     if (!isServer) {
       return {

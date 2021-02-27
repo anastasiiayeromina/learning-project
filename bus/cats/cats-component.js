@@ -1,15 +1,15 @@
 // Core
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-
 // Actions
-import { catsActions } from '../bus/cats/actions';
-
+import { catsActions } from './actions';
 // Selectors
-import { selectCatsEntries } from '../bus/cats/selectors';
-import { getUniqueId } from '../helpers/getUniqueId';
-import { selectUserId } from '../bus/user/selectors';
-import { environmentVerify } from '../helpers/verifyEnvironment';
+import { selectCatsEntries } from './selectors';
+import { getUniqueId } from '../../helpers/getUniqueId';
+import { selectUserId } from '../user/selectors';
+import { environmentVerify } from '../../helpers/verifyEnvironment';
+// Styles
+import styles from './styles.module.scss';
 
 const CatsComponent = () => {
   const dispatch = useDispatch();
@@ -50,9 +50,9 @@ const CatsComponent = () => {
   ));
 
   return (
-    <section>
+    <section className={styles.cats}>
       <h1>Cats</h1>
-      <div>
+      <div className={styles.list}>
         {entriesJSX}
       </div>
     </section>

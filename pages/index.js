@@ -24,7 +24,7 @@ import Message from '../components/message';
 import Menu from '../components/menu';
 import AsteroidsComponent from '../components/asteroids-component';
 import PokemonsComponent from '../components/pokemons-component';
-import CatsComponent from '../components/cats-component';
+import CatsComponent from '../bus/cats/cats-component';
 // Other
 import queryPokemons from '../bus/pokemons/usePokemons/gql/queryPokemons.graphql';
 
