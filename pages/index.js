@@ -48,6 +48,9 @@ export const getServerSideProps = async (context) => {
     nookies.set(context, 'userId', userId);
   }
 
+  let userType = '';
+  let visitCounts = '';
+
   try {
     const data = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
     const cookieIndex = getCookieIndex(data, userId);
@@ -60,17 +63,16 @@ export const getServerSideProps = async (context) => {
       updateUser(data, cookieIndex);
 
       await promises.writeFile(`${PATH}/users.json`, JSON.stringify(data, null, 4));
+
+      const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
+      
+      userType = getUserStatus(userData, userId).userType;
+      visitCounts = getUserStatus(userData, userId).visitCounts;
     }
     
   } catch (error) {
       console.error(error);
   }
-
-  const userData = getParsedFile(await promises.readFile(`${PATH}/users.json`, 'utf-8'));
-  const {
-    userType,
-    visitCounts
-  } = await getUserStatus(userData, userId);
 
   await serverDispatch(store, (dispatch) => {
     dispatch(userActions.fillUser({userId}));
